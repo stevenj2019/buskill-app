@@ -22,7 +22,7 @@ import urllib.request, re, json, certifi, sys, os, math, shutil, tempfile, rando
 import os.path
 from buskill_version import BUSKILL_VERSION
 from hashlib import sha256
-from ConfigParser import SafeConfigParser()
+import toml
 
 import logging
 logger = logging.getLogger( __name__ )
@@ -227,24 +227,13 @@ class BusKill:
 		self.CURRENT_PLATFORM = platform.system().upper()
 		self.ERR_PLATFORM_NOT_SUPPORTED = 'ERROR: Your platform (' +str(platform.system())+ ') is not supported. If you believe this is an error, please file a bug report:\n\nhttps://github.com/BusKill/buskill-app/issues'
 
-		config = SafeConfigParser()
+		self.CONFIGFILENAME = 'buskill.toml'
+		self.CONFIG = self.detectConfigFile() #if file exists then stores dictionary here
 
-		self.CONFIG = None
-
-		# NOTE self.config will change to a dictionary if the file is found 
 		# 	if not a startup routine should begin 
 		#	Dictionary keys will be the setting and the value the variable 
 		# 	i.e. Trigger would be the key, the trigger file location would be the value 
 
-		if os.file.exists(APP_DIR, 'buskill.conf'):
-			self.CONFIG = dict()
-			config.read('buskill.conf')
-			for name, value in config.options():
-				self.config[name] == value
-		else:
-			do_something = None	
-		# NOTE This a placeholder!!!! 
-		# Here there should be a setup wizard which will create the config file (TODO Make the function to create Config files)
 		# 	 
 		# NOTE about instance fields used for storing path info relative to the
 		#      buskill executable:
@@ -497,7 +486,7 @@ class BusKill:
 			fd.write( contents )
 
 		self.GNUPGHOME = os.path.join( self.CACHE_DIR, '.gnupg' )
-
+	
 	def toggle(self):
 
 		if self.is_armed:
@@ -564,6 +553,22 @@ class BusKill:
 			self.TRIGGER_FUNCTION()
 
 	####################
+	# CONFIG FUNCTIONS #
+	####################
+
+	def detectConfigFile(self):
+		try: 
+			with open(os.path.join(SELF.DATA_DIR, self.CONFIGFILENAME)) as config:
+				self.CONFIG = toml.load(config)
+		except FileNotFoundError:
+			SELF.CONFIG = None
+
+	def firstTimeUse(self, config):
+		with open(os.path.join(self.DATA_DIR, self.CONFIGFILENAME)) as file:
+			toml.dump(config)
+
+			
+	####################
 	# ARMING FUNCTIONS #
 	####################
 
@@ -623,14 +628,11 @@ class BusKill:
 
 		windll.user32.LockWorkStation()
 
-#TODO test on other mac kernel version for sierra - big sur
 	def triggerMac(self):
 		msg = "DEBUG: BusKill lockscreen trigger executing now"
 		print( msg ); logger.info( msg )
-		if self.KERNEL_VERSION.startswith('17') or self.KERNEL_VERSION.startswith('19'): # High Sierra or Catalina
+		if self.KERNEL_VERSION.startswith('17') or self.KERNEL_VERSION.startswith('18') or self.KERNEL_VERSION.startswith('19'): # High Sierra or Mojave or Catalina
 			subprocess.run(['/System/Library/CoreServices/Menu Extras/user.menu/Contents/Resources/CGSession', '-suspend']) 
-		#elif self.KERNEL_VERSION.startswith('18'): # Mojave
-			# Find which command works
 		else:
 			msg = "ERROR: Mac Kernel" + self.KERNEL_VERSION + "Unsupported"
 			print( msg ); logger.error(msg)

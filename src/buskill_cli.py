@@ -39,7 +39,7 @@ def BusKillCLI():
 	# HANDLE ARGUMENTS #
 	####################
 
-	# we use ArgmentParser to handle the user's command-line arguents
+	# we use ArgumentParser to handle the user's command-line arguments
 	parser = argparse.ArgumentParser(
 	 prog = "buskill",
 	 description  = 'App for arming and configuring BusKill.'
@@ -63,6 +63,12 @@ def BusKillCLI():
 	 action="store_true"
 	)
 
+	parser.add_argument(
+		"-C", "--clear",
+		help="Clears current configuration file",
+		action="store_true"
+	)
+
 	# process command-line arguments
 	args = parser.parse_args()
 
@@ -79,6 +85,12 @@ def BusKillCLI():
 		msg = bk.ERR_PLATFORM_NOT_SUPPORTED
 		print( msg ); logger.error( msg )
 		sys.exit(1)
+
+	if not bk.CONFIG():
+		#options for settings to go here
+		#TODO: Define Options for the config file
+		settings = dict()
+		bk.firstTimeUse(settings)
 
 	if args.upgrade:
 
