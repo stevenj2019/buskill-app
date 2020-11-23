@@ -562,12 +562,26 @@ class BusKill:
 				self.CONFIG = toml.load(config)
 		except FileNotFoundError:
 			SELF.CONFIG = None
+			msg = "buskill.toml not found, starting first use process"
+			print( msg ); logger.debug( msg ) 
 
 	def firstTimeUse(self, config):
 		with open(os.path.join(self.DATA_DIR, self.CONFIGFILENAME)) as file:
 			toml.dump(config)
+			msg = "config file created at " + self.DATA_DIR + " with name " + self.CONFIGFILENAME 
+			print( msg ); logger.debug( msg )
 
-			
+	def clearConfig(self):
+		try:
+			os.remove(os.path.join(self.DATA_DIR, self.CONFIGFILENAME))
+			msg = "buskill config cleared"
+			print( msg ); logger.debug( msg )
+		except FileNotFoundError:
+			msg = "clear config attempted, buskill.toml not found"
+			print( msg ); logger.debug( msg ) 
+		
+
+
 	####################
 	# ARMING FUNCTIONS #
 	####################

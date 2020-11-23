@@ -115,6 +115,9 @@ def BusKillCLI():
 	if args.arm:
 		bk.toggle()
 
+	if args.clear:
+		bk.clearConfig()
+
 	else:
 		msg = "Nothing to do."
 		print( msg ); logger.warning( msg )
